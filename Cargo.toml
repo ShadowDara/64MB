@@ -1,0 +1,8 @@
+[package]
+name = "file-explorer-term"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Crossterm für Terminalsteuerung (Raw Mode, Cursor, Größe, Events etc.)
+crossterm = "0.28"
