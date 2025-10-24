@@ -4,6 +4,9 @@ use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 
+// Version
+pub const VERSION: &str = "0.1.0";
+
 // Main Function
 fn main() -> std::io::Result<()> {
     // START
@@ -19,6 +22,7 @@ fn main() -> std::io::Result<()> {
     let files = list_dir(Path::new(&cwd))?;
 
     // PRINT TOPLINE
+    println!("Terminal File Explorer V{}", VERSION);
 
     // GET BIGGEST SIZE
     let mut max_digits = 0;
@@ -75,9 +79,63 @@ fn main() -> std::io::Result<()> {
             sizespaces.push(' ');
         }
 
+        let mut calculatedsize = f.size;
+        let mut sizedefinition = "  B";
+        // KYLOBYTES
+        if calculatedsize >= 10000 {
+            calculatedsize = calculatedsize / 1024;
+            sizedefinition = " KB";
+            sizespaces.push(' ');
+            sizespaces.push(' ');
+            sizespaces.push(' ');
+        }
+        // MEGABYTES
+        if calculatedsize >= 10000 {
+            calculatedsize = calculatedsize / 1024;
+            sizedefinition = " MB";
+            sizespaces.push(' ');
+            sizespaces.push(' ');
+            sizespaces.push(' ');
+        }
+        // GYGABYTES
+        if calculatedsize >= 10000 {
+            calculatedsize = calculatedsize / 1024;
+            sizedefinition = " GB";
+            sizespaces.push(' ');
+            sizespaces.push(' ');
+            sizespaces.push(' ');
+        }
+        // TERABYTES
+        if calculatedsize >= 10000 {
+            calculatedsize = calculatedsize / 1024;
+            sizedefinition = " TB";
+            sizespaces.push(' ');
+            sizespaces.push(' ');
+            sizespaces.push(' ');
+        }
+        // PETABYTES
+        if calculatedsize >= 10000 {
+            calculatedsize = calculatedsize / 1024;
+            sizedefinition = " PB";
+            sizespaces.push(' ');
+            sizespaces.push(' ');
+            sizespaces.push(' ');
+        }
+
         println!(
-            "{}  {}{}    {}{}  B",
-            prefix, cropname, nfw, sizespaces, f.size
+            "{}  {}{}    {}{}{}",
+            // TYPE
+            prefix,
+            // Croppet Name
+            cropname,
+            // Whitespaces after the name
+            nfw,
+            // Spaces Before the Size
+            sizespaces,
+            // Size Number
+            calculatedsize,
+            // Size Definition
+            sizedefinition
         );
     }
 
