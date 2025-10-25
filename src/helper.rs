@@ -1,4 +1,6 @@
 use std::{fs, io, path::Path};
+use unicode_width::UnicodeWidthChar;
+use unicode_width::UnicodeWidthStr;
 
 // Struktur eines Dateieintrags
 pub struct FileEntry {
@@ -36,9 +38,21 @@ pub fn num_digits(mut n: u64) -> usize {
 }
 
 /// Kürzt einen String auf die angegebene Länge
-fn crop_string(s: &str, max_len: usize) -> String {
-    if s.len() > max_len {
-        format!("{}…", &s[..max_len.saturating_sub(1)])
+
+fn crop_string(s: &str, max_width: usize) -> String {
+    if s.width() > max_width {
+        let mut result = String::new();
+        let mut current = 0;
+        for ch in s.chars() {
+            let w = ch.width().unwrap_or(0);
+            if current + w >= max_width.saturating_sub(1) {
+                break;
+            }
+            result.push(ch);
+            current += w;
+        }
+        result.push('…');
+        result
     } else {
         s.to_string()
     }
@@ -57,11 +71,9 @@ fn human_readable_size(size: u64) -> (f64, &'static str) {
 }
 
 /// Gibt einen Dateieintrag formatiert aus
-pub fn print_file_entry(f: &FileEntry, name_chars: u16, max_digits: usize) {
-    let prefix = if f.is_dir { "[DIR]  " } else { "[FILE] " };
-    let cropped = crop_string(&f.name, name_chars as usize);
-    let padding = " ".repeat(name_chars.saturating_sub(f.name.len() as u16) as usize);
-
+pub fn print_file_entry(f: &FileEntry, name_width: u16, max_digits: usize) {
+    let prefix = if f.is_dir { "[DIR]" } else { "[FILE]" };
+    let cropped = crop_string(&f.name, name_width as usize);
     let (size_val, size_unit) = human_readable_size(f.size);
     let size_str = format!(
         "{:>width$.2} {}",
@@ -70,7 +82,13 @@ pub fn print_file_entry(f: &FileEntry, name_chars: u16, max_digits: usize) {
         width = max_digits + 3
     );
 
-    println!("{}  {}{}  {}", prefix, cropped, padding, size_str);
+    println!(
+        "{:<7} {:<width$} {}",
+        prefix,
+        cropped,
+        size_str,
+        width = name_width as usize
+    );
 }
 
 /// Berechnet die Größe eines Ordners rekursiv in Bytes
